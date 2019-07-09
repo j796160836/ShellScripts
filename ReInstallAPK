@@ -1,0 +1,54 @@
+#!/bin/bash
+
+# Parameter check
+
+if [[ "$1" == *'help' ]] || [[ "$1" == '-h' ]] ;then
+    echo "Usage:"
+    echo "  Method 1:"
+    echo "   \$ $0 <apk_apk_file> [start]"
+    echo
+    echo "  Method 2:"
+    echo "   \$ $0"
+    echo "   (Fetch single apk to install)"
+    echo
+    echo "  Method 3:"
+    echo "   \$ $0 --help"
+    echo "   (Show this help)"
+    echo
+    exit -1
+fi
+
+apk_file=$1
+if [ -z $apk_file ]; then
+	apk_file_num=`ls *.apk | wc -l | tr -d ' '`
+	if [ $apk_file_num -gt 1 ]; then
+		echo "Ambiguous apk_files. Please enter one APK to install."
+		exit -1
+	fi
+	apk_file=`ls *.apk`
+fi
+
+if [ -z $ANDROID_HOME ]; then
+    echo "Error: Please set ANDROID_HOME to environment variable."
+    exit -1
+fi
+
+# Add aapt to path
+for aapt_path in ${ANDROID_HOME}/build-tools/*/; do break; done
+
+export PATH="$PATH:${aapt_path}"
+
+# Get the package name and activity name from apk
+package=`aapt dump badging $apk_file | grep package | awk '{print $2}' | sed s/name=//g | sed s/\'//g`
+activity=`aapt dump badging $apk_file | grep Activity | awk '{print $2}' | sed s/name=//g | sed s/\'//g`
+echo "Installing "$apk_file"..."
+echo
+echo "Package: "$package
+echo "Activity: "$activity
+
+adb uninstall $package
+adb install $apk_file
+
+if [ "$2" == "start" ] || [ "$2" == "s" ] ; then
+	adb shell am start -n $package/$activity
+fi

@@ -1,0 +1,6 @@
+#!/bin/bash
+DEVICE=$1
+if [ -z $DEVICE ]; then
+	DEVICE=`adb devices | sed '/List of devices/d' | head -n 1 | awk '{print $1}'`
+fi
+adb -s $DEVICE shell 'pm list packages -f -3' | sed -e 's/.*=//' | sed -e "s/^/adb -s $DEVICE uninstall /" | sort | less

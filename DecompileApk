@@ -1,0 +1,10 @@
+#!/bin/bash
+if test $# -lt 1 ; then
+	echo "Usage: $0 <target-apk>"
+	exit 1
+fi
+FILE_NAME=$1
+FOLDER_NAME=`echo $1 | sed 's/^\(.*\)\.\(.*\)$/\1/'`
+mkdir -p $FOLDER_NAME
+apktool -f d $FILE_NAME
+d2j-dex2jar --force $FILE_NAME -o $FOLDER_NAME/$FOLDER_NAME'_dex.jar'

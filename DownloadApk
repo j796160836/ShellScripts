@@ -1,0 +1,10 @@
+#!/bin/sh
+if test $# -lt 1 ; then
+	echo "Usage: download_apk.sh <GooglePlayPackageName>"
+	exit 1
+fi
+ 
+PACKAGE=$1
+APK_PATH=`adb shell pm list packages -f -3 | grep $PACKAGE | cut -d'=' -f 1 | cut -c9-`
+echo "Pulling $APK_PATH from device"
+echo `adb pull ${APK_PATH} ./${PACKAGE}.apk`
